@@ -14,9 +14,20 @@
 
 package org.openmrs.api.impl;
 
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.openmrs.Condition.Status.ACTIVE;
+import static org.openmrs.Condition.Status.INACTIVE;
+
+import java.util.Date;
+import java.util.List;
+
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,20 +44,8 @@ import org.openmrs.api.db.ConditionDAO;
 import org.openmrs.api.validator.ConditionValidator;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.BindException;
-import org.springframework.validation.Errors;
-import org.springframework.validation.ObjectError;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-public class ConditionServiceImplIT extends BaseModuleContextSensitiveTest {
+public class ConditionServiceImplTest extends BaseModuleContextSensitiveTest {
 
     @Autowired
     ConditionService conditionService;
@@ -75,13 +74,13 @@ public class ConditionServiceImplIT extends BaseModuleContextSensitiveTest {
     }
     @Test
     public void shouldCreateNewCondition() {
-        Condition condition = createCondition(Condition.Status.PRESUMED, "Tuberculosis", 2, "3584c584-c291-46c8-8584-96dc33d19584", null);
+        Condition condition = createCondition(Condition.Status.ACTIVE, "Tuberculosis", 2, "3584c584-c291-46c8-8584-96dc33d19584", null);
         conditionService.save(condition);
         List<Condition> conditionsList = conditionDAO.getConditionHistory(condition.getPatient());
         assertEquals(conditionsList.size(), 3);
         assertTrue(condition.getId() > 0);
         assertEquals("3584c584-c291-46c8-8584-96dc33d19584", condition.getUuid());
-        assertEquals(Condition.Status.PRESUMED, condition.getStatus());
+        assertEquals(Condition.Status.ACTIVE, condition.getStatus());
         assertEquals("Tuberculosis", condition.getConcept().getName().getName());
     }
 
@@ -139,8 +138,57 @@ public class ConditionServiceImplIT extends BaseModuleContextSensitiveTest {
         assertEquals(conditionHistoryForPatient.size(), 4);
         
         assertThat(conditionHistoryForPatient, contains(new ConditionHistoryMatcher("severe", 1),
-        	new ConditionHistoryMatcher("pain", 1), new ConditionHistoryMatcher("Angina", 1), 
+        	new ConditionHistoryMatcher("pain", 1), new ConditionHistoryMatcher("Angina", 1),
         	new ConditionHistoryMatcher("Tuberculosis", 1)));
+    }
+    
+    @Test
+    public void shouldSetEndDateIfStatusHasChanged(){
+        Date today = new Date();
+        Condition existingCondition = conditionService.getConditionByUuid("c84i8o0e-2n46-11e4-58f4-a6i5e4d22fb7");
+        
+        assertEquals(existingCondition.getStatus(),ACTIVE);
+    
+        Condition condition = Condition.newInstance(existingCondition);
+        condition.setUuid(existingCondition.getUuid());
+        condition.setEndDate(today);
+        condition.setStatus(INACTIVE);
+    
+        Condition newCondition = conditionService.save(condition);
+    
+        assertNotSame(existingCondition,newCondition);
+        assertNotSame(existingCondition.getUuid(),newCondition.getUuid());
+        assertEquals(ACTIVE,existingCondition.getStatus());
+        assertEquals(INACTIVE,newCondition.getStatus());
+        assertTrue(isEquals(today,existingCondition.getEndDate()));
+        assertTrue(isEquals(today,newCondition.getOnsetDate()));
+        assertNull(newCondition.getEndDate());
+    }
+
+    @Test
+    public void shouldSetEndDateIfStatusHasChangedAndEndDateIsNull(){
+        Date today = new Date();
+        Condition existingCondition = conditionService.getConditionByUuid("c84i8o0e-2n46-11e4-58f4-a6i5e4d22fb7");
+        
+        assertEquals(existingCondition.getStatus(),ACTIVE);
+    
+        Condition condition = Condition.newInstance(existingCondition);
+        condition.setUuid(existingCondition.getUuid());
+        condition.setStatus(INACTIVE);
+
+        Condition newCondition = conditionService.save(condition);
+        
+        assertNotSame(condition,newCondition);
+        assertNotSame(existingCondition.getUuid(),newCondition.getUuid());
+        assertEquals(ACTIVE,existingCondition.getStatus());
+        assertEquals(INACTIVE,newCondition.getStatus());
+        assertTrue(isEquals(today,existingCondition.getEndDate()));
+        assertTrue(isEquals(today,newCondition.getOnsetDate()));
+        assertNull(newCondition.getEndDate());
+    }
+    
+    private boolean isEquals(Date date1, Date date2) {
+        return (date2.getTime()-date1.getTime()) < 1000;
     }
     
     public static class ConditionHistoryMatcher extends TypeSafeMatcher<ConditionHistory> {

@@ -13,16 +13,10 @@
  */
 package org.openmrs;
 
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.BaseOpenmrsData;
-import org.openmrs.Concept;
-import org.openmrs.Patient;
-import org.simpleframework.xml.Attribute;
-
-import java.util.Date;
-
 
 /**
  * Defines a Condition in the system.
@@ -48,25 +42,44 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     }
 
     public enum Status {
-        PRESUMED, CONFIRMED, HISTORY_OF
+        ACTIVE, INACTIVE, HISTORY_OF
     }
 
     private Integer conditionId;
     private Condition previousCondition;
     private Patient patient;
-    private Status status = Status.PRESUMED;
+    private Status status = Status.ACTIVE;
     private Concept concept;
     private String conditionNonCoded;
     private Date onsetDate;
     private String additionalDetail;
     private Date endDate;
     private Concept endReason;
-
-
+    
+    public static Condition newInstance(Condition condition) {
+      return copy(condition, new Condition());
+    }
+    
+    public static Condition copy(Condition fromCondition, Condition toCondition) {
+        toCondition.setPreviousCondition(fromCondition.getPreviousCondition());
+        toCondition.setPatient(fromCondition.getPatient());
+        toCondition.setStatus(fromCondition.getStatus());
+        toCondition.setConcept(fromCondition.getConcept());
+        toCondition.setConditionNonCoded(fromCondition.getConditionNonCoded());
+        toCondition.setOnsetDate(fromCondition.getOnsetDate());
+        toCondition.setAdditionalDetail(fromCondition.getAdditionalDetail());
+        toCondition.setEndDate(fromCondition.getEndDate());
+        toCondition.setEndReason(fromCondition.getEndReason());
+        toCondition.setVoided(fromCondition.getVoided());
+        toCondition.setVoidedBy(fromCondition.getVoidedBy());
+        toCondition.setVoidReason(fromCondition.getVoidReason());
+        toCondition.setDateVoided(fromCondition.getDateVoided());
+        return toCondition;
+    }
+    
     /**
      * @return Returns the conditionId.
      */
-    @Attribute(required = true)
     public Integer getConditionId() {
         return conditionId;
     }
@@ -74,7 +87,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @param conditionId The conditionId to set.
      */
-    @Attribute(required = true)
     public void setConditionId(Integer conditionId) {
         this.conditionId = conditionId;
     }
@@ -82,7 +94,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @return Returns the previousCondition.
      */
-    @Attribute(required = false)
     public Condition getPreviousCondition() {
         return previousCondition;
     }
@@ -92,7 +103,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
      * When a condition is altered (e.g., a symptom explicitly converted into a diagnosis), this field
      * is used to link the new condition to the condition(s) it has replaced.
      */
-    @Attribute(required = false)
     public void setPreviousCondition(Condition previousCondition) {
         this.previousCondition = previousCondition;
     }
@@ -100,7 +110,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @return Returns the patient.
      */
-    @Attribute(required = true)
     public Patient getPatient() {
         return patient;
     }
@@ -108,7 +117,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @param patient The patient to set.
      */
-    @Attribute(required = true)
     public void setPatient(Patient patient) {
         if(getConditionId() != null && getPatient() !=null && !getPatient().equals(patient)) {
             throw new IllegalArgumentException("Patient cannot be changed");
@@ -119,24 +127,22 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @return Returns the status.
      */
-    @Attribute(required = true)
     public Status getStatus() {
         return status;
     }
 
     /**
      * @param status The status to set.
-     * The clinical status of the condition.  Default is PRESUMED.
+     * The clinical status of the condition.  Default is ACTIVE.
      * <ul>
-     * <li><b>PRESUMED</b> when the condition is suspected, but not yet confirmed
+     * <li><b>ACTIVE</b> when the condition is suspected, but not yet confirmed
      * (HL7 uses the term "working")</li>
-     * <li><b>CONFIRMED</b> when the condition has been confirmed (typically for
+     * <li><b>INACTIVE</b> when the condition has been confirmed (typically for
      * diagnoses)</li>
      * <li><b>HISTORY_OF</b> when the history of a condition is relevant to the
      * patient's ongoing medical care (e.g., history of stroke)</li>
      * </ul>
      */
-    @Attribute(required = true)
     public void setStatus(Status status) {
         this.status = status;
     }
@@ -144,7 +150,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @return Returns the concept.
      */
-    @Attribute(required = true)
     public Concept getConcept() {
         return concept;
     }
@@ -152,7 +157,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @param concept The concept to set.
      */
-    @Attribute(required = true)
     public void setConcept(Concept concept) {
         if(getConditionId() != null && getConcept() !=null && !getConcept().equals(concept)){
             throw new IllegalArgumentException("Concept cannot be changed");
@@ -163,7 +167,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @return Returns the conditionNonCoded.
      */
-    @Attribute(required = false)
     public String getConditionNonCoded() {
         return conditionNonCoded;
     }
@@ -173,7 +176,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
      * When a condition is not codified, the concept for the condition is set to a concept for
      * NON-CODED and the free text representation of the condition is stored here.
      */
-    @Attribute(required = false)
     public void setConditionNonCoded(String conditionNonCoded) {
         if(getConditionId() != null && getConditionNonCoded() != null && !getConditionNonCoded().equals(conditionNonCoded))
         {
@@ -185,7 +187,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @return Returns the onsetDate.
      */
-    @Attribute(required = false)
     public Date getOnsetDate() {
         return onsetDate;
     }
@@ -193,7 +194,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @param onsetDate The onsetDate to set.
      */
-    @Attribute(required = false)
     public void setOnsetDate(Date onsetDate) {
         this.onsetDate = onsetDate;
     }
@@ -201,7 +201,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @return Returns the additionalDetail.
      */
-    @Attribute(required = false)
     public String getAdditionalDetail() {
         return additionalDetail;
     }
@@ -215,7 +214,6 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
      *  additional detail is assumed to be refining the condition and not providing encounter-
      *  specific information.
      */
-    @Attribute(required = false)
     public void setAdditionalDetail(String additionalDetail) {
         this.additionalDetail = additionalDetail;
     }
@@ -223,7 +221,7 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @return Returns the endDate.
      */
-    @Attribute(required = true)
+   
     public Date getEndDate() {
         return endDate;
     }
@@ -231,7 +229,7 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @param endDate The endDate to set.
      */
-    @Attribute(required = false)
+   
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
@@ -239,7 +237,7 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @return Returns the endReason.
      */
-    @Attribute(required = true)
+   
     public Concept getEndReason() {
         return endReason;
     }
@@ -247,7 +245,7 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     /**
      * @param endReason The endReason to set.
      */
-    @Attribute(required = false)
+   
     public void setEndReason(Concept endReason) {
         this.endReason = endReason;
     }
@@ -266,5 +264,47 @@ public class Condition extends BaseOpenmrsData implements java.io.Serializable {
     @Override
     public void setId(Integer conditionId) {
         setConditionId(conditionId);
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        
+        Condition condition = (Condition) o;
+        
+        if (!patient.equals(condition.patient)) {
+            return false;
+        }
+        if (status != condition.status) {
+            return false;
+        }
+        if (!concept.equals(condition.concept)) {
+            return false;
+        }
+        if (conditionNonCoded != null ?
+                !conditionNonCoded.equals(condition.conditionNonCoded) :
+                condition.conditionNonCoded != null) {
+            return false;
+        }
+        if (onsetDate != null ? !onsetDate.equals(condition.onsetDate) : condition.onsetDate != null) {
+            return false;
+        }
+        if (additionalDetail != null ?
+                !additionalDetail.equals(condition.additionalDetail) :
+                condition.additionalDetail != null) {
+            return false;
+        }
+        if (endDate != null ? !endDate.equals(condition.endDate) : condition.endDate != null) {
+            return false;
+        }
+        return endReason != null ? endReason.equals(condition.endReason) : condition.endReason == null;
     }
 }

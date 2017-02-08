@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-
-		 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 
     <bean id="conditionDAO" class="org.openmrs.api.db.hibernate.HibernateConditionDAO">
@@ -38,5 +35,14 @@
     <bean id="conditionValidator" class="org.openmrs.api.validator.ConditionValidator">
         <constructor-arg name="conditionService" ref="conditionService"/>
         <constructor-arg name="administrationService" ref="adminService"/>
+    </bean>
+
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list>
+                <value>org.openmrs.api.ConditionService</value>
+                <ref bean="conditionService" />
+            </list>
+        </property>
     </bean>
 </beans>

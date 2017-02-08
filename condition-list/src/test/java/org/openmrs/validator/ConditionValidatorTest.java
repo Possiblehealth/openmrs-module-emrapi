@@ -34,7 +34,7 @@ import org.springframework.validation.ObjectError;
 import java.util.Date;
 import java.util.List;
 
-public class ConditionValidatorIT extends BaseModuleContextSensitiveTest {
+public class ConditionValidatorTest extends BaseModuleContextSensitiveTest {
 
     @Autowired
     ConditionService conditionService;
@@ -80,7 +80,7 @@ public class ConditionValidatorIT extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotAllowDuplicateConditionsWhiteSpacesAndCaseChangesInConditionNonCodedValue() {
-        Condition condition = createCondition(Condition.Status.PRESUMED, "OTHER, NON-CODED", 2, "3584c584-c291-46c8-8584-96dc33d19584", "P a I n");
+        Condition condition = createCondition(Condition.Status.ACTIVE, "OTHER, NON-CODED", 2, "3584c584-c291-46c8-8584-96dc33d19584", "P a I n");
         Errors errors = new BindException(condition, "condition");
         conditionValidator.validate(condition, errors);
         Assert.assertTrue(errors.hasErrors());
@@ -90,7 +90,7 @@ public class ConditionValidatorIT extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotAllowInValidEndReasonConcept() {
-        Condition condition = createCondition(Condition.Status.CONFIRMED, "Tuberculosis", 1, "2cc6880e-2c46-11e4-9038-a6c5e4d22fb7", null);
+        Condition condition = createCondition(Condition.Status.INACTIVE, "Tuberculosis", 1, "2cc6880e-2c46-11e4-9038-a6c5e4d22fb7", null);
         Concept endReasonConcept = conceptService.getConceptByName("invalid end reason");
         condition.setEndReason(endReasonConcept);
         Errors errors = new BindException(condition, "condition");
@@ -101,7 +101,7 @@ public class ConditionValidatorIT extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldAllowValidEndReasonConcept() {
-        Condition condition = createCondition(Condition.Status.CONFIRMED, "Tuberculosis", 1, "2cc6880e-2c46-11e4-9038-a6c5e4d22fb7", null);
+        Condition condition = createCondition(Condition.Status.INACTIVE, "Tuberculosis", 1, "2cc6880e-2c46-11e4-9038-a6c5e4d22fb7", null);
         Concept endReasonConcept = conceptService.getConceptByName("cured");
         condition.setEndReason(endReasonConcept);
         Errors errors = new BindException(condition, "condition");

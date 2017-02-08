@@ -20,12 +20,10 @@ import org.openmrs.Patient;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.util.PrivilegeConstants;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public interface ConditionService extends OpenmrsService {
-    @Authorized({PrivilegeConstants.EDIT_CONDITIONS})
+    @Authorized({ PrivilegeConstants.EDIT_CONDITIONS})
     Condition save(Condition condition);
 
     @Authorized({PrivilegeConstants.EDIT_CONDITIONS})

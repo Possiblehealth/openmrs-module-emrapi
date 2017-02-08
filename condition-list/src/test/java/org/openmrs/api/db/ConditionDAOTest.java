@@ -28,7 +28,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class ConditionDAOIT extends BaseModuleContextSensitiveTest {
+public class ConditionDAOTest extends BaseModuleContextSensitiveTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -46,7 +46,7 @@ public class ConditionDAOIT extends BaseModuleContextSensitiveTest {
     @Test
     public void shouldGetConditionByUuid() {
         Condition condition = conditionDao.getConditionByUuid("2cc6880e-2c46-11e4-9038-a6c5e4d22fb7");
-        assertEquals(Condition.Status.CONFIRMED, condition.getStatus());
+        assertEquals(Condition.Status.INACTIVE, condition.getStatus());
         assertEquals("Tuberculosis", condition.getConcept().getName().getName());
         assertEquals("2015-01-12 00:00:00.0", condition.getDateCreated().toString());
     }

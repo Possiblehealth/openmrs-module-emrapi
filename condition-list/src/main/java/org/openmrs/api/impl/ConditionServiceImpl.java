@@ -44,15 +44,34 @@ public class ConditionServiceImpl extends BaseOpenmrsService implements Conditio
         this.conceptService = conceptService;
         this.administrationService = administrationService;
     }
-
+    
     @Override
     public Condition save(Condition condition) {
-        if (condition.getEndReason() != null && condition.getEndDate() == null) {
-            condition.setEndDate(new Date());
+        Date endDate = condition.getEndDate() != null ? condition.getEndDate() : new Date();
+        if (condition.getEndReason() != null) {
+            condition.setEndDate(endDate);
         }
+        Condition existingCondition = getConditionByUuid(condition.getUuid());
+        if(condition.equals(existingCondition)){
+            return existingCondition;
+        }
+        if(existingCondition==null){
+            return conditionDAO.saveOrUpdate(condition);
+        }
+        condition=Condition.newInstance(condition);
+        condition.setPreviousCondition(existingCondition);
+        if(existingCondition.getStatus().equals(condition.getStatus())){
+            existingCondition.setVoided(true);
+            conditionDAO.saveOrUpdate(existingCondition);
+            return conditionDAO.saveOrUpdate(condition);
+        }
+        existingCondition.setEndDate(endDate);
+        conditionDAO.saveOrUpdate(existingCondition);
+        condition.setOnsetDate(endDate);
+        condition.setEndDate(null);
         return conditionDAO.saveOrUpdate(condition);
     }
-
+    
     public List<ConditionHistory> getConditionHistory(Patient patient) {
         List<Condition> conditionList = conditionDAO.getConditionHistory(patient);
         Map<String, ConditionHistory> allConditions = new LinkedHashMap<String, ConditionHistory>();

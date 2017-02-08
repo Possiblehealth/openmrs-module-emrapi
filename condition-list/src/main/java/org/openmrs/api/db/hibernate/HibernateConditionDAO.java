@@ -16,10 +16,9 @@ package org.openmrs.api.db.hibernate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
-import org.openmrs.api.db.hibernate.DbSessionFactory;  
+import org.openmrs.api.db.ConditionDAO;
 import org.openmrs.Condition;
 import org.openmrs.Patient;
-import org.openmrs.api.db.ConditionDAO;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
